@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>SheSafe – Women Safety Platform</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+</head>
+<body class="bg-gray-50 min-h-screen font-serif">
+
+  <header class="bg-pink-900 text-white p-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <img src="https://static.vecteezy.com/system/resources/previews/004/291/033/non_2x/women-protection-black-glyph-icon-protect-girls-against-violence-female-empowerment-women-safety-gender-equality-provide-security-silhouette-symbol-on-white-space-isolated-illustration-vector.jpg"
+           alt="SheSafe Logo"
+           class="h-12 w-12 rounded-full bg-white object-cover">
+      <h1 class="text-3xl font-bold">SheSafe</h1>
+    </div>
+    <div class="flex items-center gap-4">
+      <button id="loginBtn" class="relative bg-pink-700 px-4 py-2 rounded-lg shadow-md transition-all duration-300 ease-in-out 
+                 hover:bg-gradient-to-r hover:from-pink-600 hover:to-pink-800 hover:scale-110 hover:shadow-pink-500/50 
+                 focus:outline-none focus:ring-2 focus:ring-pink-300 flex items-center gap-2 group">
+        <span class="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-10 bg-white pointer-events-none transition-all duration-300"></span>
+        <i class="fas fa-sign-in-alt text-white text-sm"></i>
+        <span class="text-white font-semibold">Login</span>
+      </button>
+      <button id="signupBtn" class="relative bg-green-600 px-4 py-2 rounded-lg shadow-md transition-all duration-300 ease-in-out 
+                 hover:bg-gradient-to-r hover:from-green-500 hover:to-green-700 hover:scale-110 hover:shadow-green-400/50 
+                 focus:outline-none focus:ring-2 focus:ring-green-300 flex items-center gap-2 group">
+        <span class="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-10 bg-white pointer-events-none transition-all duration-300"></span>
+        <i class="fas fa-user-plus text-white text-sm"></i>
+        <span class="text-white font-semibold">Sign Up</span>
+      </button>
+  </header>
+      <div class="relative bg-white overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
+                <main class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 lg:mt-16 lg:px-8 xl:mt-20">
+                    <div class="sm:text-center lg:text-left">
+                        <h1 class="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+                            <span class="block">Stay Safe with</span>
+                            <span class="block text-pink-800">SheSafe</span>
+                        </h1>
+                        <p class="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                            Your personal safety companion that helps you navigate the world with confidence. Report incidents, find safe routes, and get help when you need it.
+                        </p>
+                        <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+                            <div class="rounded-md shadow">
+                                <a href="#" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-pink-500 hover:bg-pink-800 md:py-4 md:text-lg md:px-10">
+                                    Get Started
+                                </a>
+                            </div>
+                            <div class="mt-3 sm:mt-0 sm:ml-3">
+                                <a href="#" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-pink-800 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10 border-primary">
+                                    Learn More
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+        <div id="carousel" class="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
+            <img id="carousel-image" class="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full" src="" alt="Woman feeling safe">
+            <div id="carousel-dots" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px;"></div>
+        </div>
+    </div>
+
+  <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-xs">
+      <h2 class="text-xl font-bold mb-4 text-pink-700">Login</h2>
+      <form id="loginForm" class="flex flex-col gap-3">
+        <input id="loginUsername" type="text" placeholder="Username" class="border rounded px-3 py-2" required>
+        <input id="loginPassword" type="password" placeholder="Password" class="border rounded px-3 py-2" required>
+        <button type="submit" class="bg-pink-700 text-white rounded px-4 py-2 font-semibold hover:bg-pink-800 transition">Login</button>
+        <button type="button" id="closeLoginModal" class="text-pink-700 mt-2 hover:underline">Cancel</button>
+      </form>
+      <div id="loginError" class="text-red-600 text-sm mt-2 hidden"></div>
+    </div>
+  </div>
+  <main class="flex flex-col md:flex-row h-[calc(100vh-64px)]">
+  <div id="mainMapContainer"
+    class="ml-4 w-2xl rounded-2xl shadow-lg my-4 border-4 border-pink-700 border-solid
+           shadow-[0_0_30px_6px_rgba(219,39,119,0.7)] transition-all duration-300">
+    <div id="map" style="height:665px;"></div>
+  </div>
+
+</div>
+    <section class="flex-1 relative">
+      <div class="absolute top-4 right-4 z-10 flex flex-col gap-3">
+        <button id="sosBtn" class="bg-red-600 text-white px-5 py-2.5 rounded-xl shadow-md transition-all duration-300 ease-in-out 
+                 hover:bg-gradient-to-r hover:from-red-600 hover:to-red-800 hover:scale-105 
+                 focus:outline-none focus:ring-2 focus:ring-red-400 font-semibold tracking-wide">
+          <i class="fas fa-exclamation-triangle mr-2"></i>SOS
+        </button>
+        <button id="openReportBtn" class="bg-white text-pink-900 px-5 py-2.5 rounded-xl shadow-md border border-pink-900 
+                 transition-all duration-300 ease-in-out hover:bg-pink-50 hover:scale-105 
+                 focus:outline-none focus:ring-2 focus:ring-pink-400 font-semibold tracking-wide">
+          <i class="fas fa-flag mr-2"></i>Report Incident
+        </button>
+    <button id="tagSafeBtn" class="bg-white text-green-700 px-5 py-2.5 rounded-xl shadow-md border border-green-700 
+                 transition-all duration-300 ease-in-out hover:bg-green-50 hover:scale-105 
+                 focus:outline-none focus:ring-2 focus:ring-green-400 font-semibold tracking-wide">
+  <i class="fas fa-check-circle mr-2"></i>Tag Safe
+</button>
+<button id="tagUnsafeBtn" class="bg-white text-red-700 px-5 py-2.5 rounded-xl shadow-md border border-red-700 
+                 transition-all duration-300 ease-in-out hover:bg-red-50 hover:scale-105 
+                 focus:outline-none focus:ring-2 focus:ring-red-400 font-semibold tracking-wide">
+  <i class="fas fa-times-circle mr-2"></i>Tag Unsafe
+</button>
+<div class="bg-white border border-pink-300 rounded-xl p-3 w-60 shadow-md overflow-y-auto max-h-200">
+  <h3 class="text-center text-pink-700 font-bold text-lg mb-3">⚠️ Safety Tips</h3>
+  
+  
+  <div class="mb-3">
+    <div class="flex items-center mb-1">
+      <span class="text-purple-500 text-lg mr-2">🚶‍♀️</span>
+      <h4 class="font-semibold text-sm text-gray-800">Walking Alone</h4>
+    </div>
+    <ul class="text-xs text-gray-700 list-disc list-inside">
+      <li>Stay in well-lit areas</li>
+      <li>Keep phone accessible</li>
+      <li>Avoid headphones</li>
+    </ul>
+  </div>
+
+ 
+  <div class="mb-3">
+    <div class="flex items-center mb-1">
+      <span class="text-pink-500 text-lg mr-2">🚗</span>
+      <h4 class="font-semibold text-sm text-gray-800">Ride Safety</h4>
+    </div>
+    <ul class="text-xs text-gray-700 list-disc list-inside">
+      <li>Verify driver details</li>
+      <li>Share ride info</li>
+      <li>Use emergency features</li>
+    </ul>
+  </div>
+
+ 
+  <div class="mb-3">
+    <div class="flex items-center mb-1">
+      <span class="text-yellow-500 text-lg mr-2">🍹</span>
+      <h4 class="font-semibold text-sm text-gray-800">Night Out</h4>
+    </div>
+    <ul class="text-xs text-gray-700 list-disc list-inside">
+      <li>Watch your drink</li>
+      <li>Go with friends</li>
+      <li>Know venue exits</li>
+    </ul>
+  </div>
+
+
+  <div>
+    <div class="flex items-center mb-1">
+      <span class="text-blue-500 text-lg mr-2">🌍</span>
+      <h4 class="font-semibold text-sm text-gray-800">Travel Safety</h4>
+    </div>
+    <ul class="text-xs text-gray-700 list-disc list-inside">
+      <li>Share itinerary</li>
+      <li>Research area</li>
+      <li>Keep ID copies</li>
+    </ul>
+  </div>
+</div>
+</div>
+    </section>
+
+    <aside class="w-full md:w-96 bg-white border-l border-gray-200 p-6 overflow-y-auto flex flex-col gap-6">
+      <div>
+  <h2 class="font-bold text-lg mb-2">Find Safest Route</h2>
+  <div class="mb-2 flex gap-4 items-center">
+    <label>
+      <input type="radio" name="startType" id="startTypeCurrent" value="current" checked>
+      Your Location
+    </label>
+    <label>
+      <input type="radio" name="startType" id="startTypeOther" value="other">
+      Other
+    </label>
+  </div>
+  <input id="fromInput" class="w-full mb-2 px-3 py-2 border rounded bg-gray-100" placeholder="Start Location" readonly />
+  <input id="toInput" class="w-full mb-2 px-3 py-2 border rounded" placeholder="Destination" />
+  <button id="findRouteBtn" class="w-full bg-pink-700 text-white px-4 py-2 rounded hover:bg-pink-800">Find Route</button>
+  <div id="routeMsg" class="text-red-600 text-sm mt-2 hidden"></div>
+</div>
+      <div>
+        <h2 class="font-bold text-lg mb-2">Real-time Alerts</h2>
+        <ul class="text-sm space-y-1" id="alertsList">
+          <li class="text-red-600">[!] Incident reported near Park Street 10 mins ago</li>
+          <li class="text-yellow-600">[!] Low lighting reported at Main Avenue</li>
+        </ul>
+      </div>
+<div>
+  <h2 class="font-bold text-lg mb-2">Area Reviews</h2>
+  <div id="reviewsList" class="mb-2 space-y-2">
+  </div>
+  <button id="addReviewBtn" class="bg-pink-100 text-pink-900 px-3 py-1 rounded hover:bg-pink-200 text-sm">Add Review</button>
+</div>
+<div id="reviewModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-xs">
+    <h2 class="text-xl font-bold mb-4 text-pink-700">Add Area Review</h2>
+    <form id="reviewForm" class="flex flex-col gap-3">
+      <input id="reviewArea" type="text" placeholder="Area Name" class="border rounded px-3 py-2" required>
+      <select id="reviewRating" class="border rounded px-3 py-2" required>
+        <option value="">Rating</option>
+        <option value="5">★★★★★</option>
+        <option value="4">★★★★☆</option>
+        <option value="3">★★★☆☆</option>
+        <option value="2">★★☆☆☆</option>
+        <option value="1">★☆☆☆☆</option>
+      </select>
+      <textarea id="reviewText" placeholder="Your review..." class="border rounded px-3 py-2" required></textarea>
+      <button type="submit" class="bg-pink-700 text-white rounded px-4 py-2 font-semibold hover:bg-pink-800 transition">Submit Review</button>
+      <button type="button" id="closeReviewModal" class="text-pink-700 mt-2 hover:underline">Cancel</button>
+    </form>
+    <div id="reviewMsg" class="text-green-600 text-sm mt-2 hidden"></div>
+  </div>
+</div>
+     <div>
+        <h2 class="font-bold text-lg mb-2">Accessibility</h2>
+        <button id="voiceInputBtn" class="bg-gray-200 px-3 py-1 rounded mb-2 flex items-center gap-2">
+  <i class="fas fa-microphone text-gray-700"></i>
+  Voice Input
+</button>
+<textarea id="voiceText" class="border rounded px-3 py-2 w-full mt-2" placeholder="Voice text will appear here..."></textarea>
+      </div>
+      <button id="saveVoiceBtn" class="bg-pink-700 text-white rounded px-4 py-2 mt-2">Save Voice Text</button>   
+    </aside>
+  </main>
+
+  <div id="reportModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-xs">
+    <h2 class="text-xl font-bold mb-4 text-pink-700">Report Incident</h2>
+    <div id="reportMap" style="width:100%; height:250px;" class="rounded-lg mb-4"></div>
+    <form id="reportForm" class="flex flex-col gap-3">
+      <input id="incidentLocation" type="text" placeholder="Location" class="border rounded px-3 py-2" required>
+      <input type="hidden" id="incidentLatLng" name="incidentLatLng">
+      <textarea id="incidentDesc" placeholder="Describe incident" class="border rounded px-3 py-2" required></textarea>
+      <button type="submit" class="bg-pink-700 text-white rounded px-4 py-2 font-semibold hover:bg-pink-800 transition">Submit Report</button>
+      <button type="button" id="closeReportModal" class="text-pink-700 mt-2 hover:underline">Cancel</button>
+    </form>
+    <div id="reportMsg" class="text-green-600 text-sm mt-2 hidden"></div>
+  </div>
+</div>
+
+<section class="py-12 bg-white">
+  <div class="max-w-7xl mx-auto px-6 text-center">
+    <h2 class="text-3xl font-semibold text-gray-800 mb-10 animate-fade-in-down">Our Features</h2>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      
+      
+      <div class="bg-gray-50 p-6 rounded-xl shadow-md text-left transform transition duration-300 hover:-translate-y-2 hover:shadow-lg hover:bg-purple-50 animate-fade-in-up">
+        <div class="w-10 h-10 bg-purple-600 text-white rounded-lg flex items-center justify-center mb-4">
+          <i class="fas fa-bell"></i>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">Emergency SOS</h3>
+        <p class="text-gray-600">Instantly alert emergency contacts and nearby authorities with your location at the press of a button.</p>
+      </div>
+
+
+      <div class="bg-gray-50 p-6 rounded-xl shadow-md text-left transform transition duration-300 hover:-translate-y-2 hover:shadow-lg hover:bg-rose-50 animate-fade-in-up delay-100">
+        <div class="w-10 h-10 bg-rose-500 text-white rounded-lg flex items-center justify-center mb-4">
+          <i class="fas fa-map-marker-alt"></i>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">Live Safety Map</h3>
+        <p class="text-gray-600">Real-time crowd-sourced safety data to help you make informed decisions about your route.</p>
+      </div>
+
+      
+      <div class="bg-gray-50 p-6 rounded-xl shadow-md text-left transform transition duration-300 hover:-translate-y-2 hover:shadow-lg hover:bg-green-50 animate-fade-in-up delay-200">
+        <div class="w-10 h-10 bg-green-500 text-white rounded-lg flex items-center justify-center mb-4">
+          <i class="fas fa-user-friends"></i>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">Safety Network</h3>
+        <p class="text-gray-600">Connect with trusted contacts who can monitor your journey and be alerted if you need help.</p>
+      </div>
+
+      
+      <div class="bg-gray-50 p-6 rounded-xl shadow-md text-left transform transition duration-300 hover:-translate-y-2 hover:shadow-lg hover:bg-purple-50 animate-fade-in-up delay-300">
+        <div class="w-10 h-10 bg-purple-500 text-white rounded-lg flex items-center justify-center mb-4">
+          <i class="fas fa-route"></i>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">Safe Route Planning</h3>
+        <p class="text-gray-600">Get recommended routes based on safety ratings, lighting, and crowd density.</p>
+      </div>
+
+      
+      <div class="bg-gray-50 p-6 rounded-xl shadow-md text-left transform transition duration-300 hover:-translate-y-2 hover:shadow-lg hover:bg-yellow-50 animate-fade-in-up delay-400">
+        <div class="w-10 h-10 bg-yellow-400 text-white rounded-lg flex items-center justify-center mb-4">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">Incident Reporting</h3>
+        <p class="text-gray-600">Quickly report safety concerns to help others in the community stay informed.</p>
+      </div>
+
+      
+      <div class="bg-gray-50 p-6 rounded-xl shadow-md text-left transform transition duration-300 hover:-translate-y-2 hover:shadow-lg hover:bg-blue-50 animate-fade-in-up delay-500">
+        <div class="w-10 h-10 bg-blue-500 text-white rounded-lg flex items-center justify-center mb-4">
+          <i class="fas fa-microphone"></i>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">Voice Commands</h3>
+        <p class="text-gray-600">Hands-free operation with voice-activated safety features when you need them most.</p>
+      </div>
+    
+    </div>
+  </div>
+</section>
+<section class="max-w-2xl mx-auto my-12 bg-white rounded-2xl shadow-lg p-8">
+  <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Frequently Asked Questions</h2>
+  <div id="faq-list" class="space-y-3">
+    
+    <div class="bg-gray-50 rounded-lg">
+      <button type="button" class="w-full flex justify-between items-center px-6 py-4 text-left text-lg text-gray-900 font-medium focus:outline-none faq-question">
+        <span>What should a woman do if she feels unsafe in a public place?</span>
+        <span class="faq-icon text-2xl transition-transform">&#43;</span>
+      </button>
+      <div class="faq-answer px-6 pb-4 text-gray-700 text-base hidden">
+        Stay calm, move to a well-lit area with people, and call for help. Use your phone to contact emergency services or trigger your safety app’s SOS feature.
+      </div>
+    </div>
+
+    <div class="bg-gray-50 rounded-lg">
+      <button type="button" class="w-full flex justify-between items-center px-6 py-4 text-left text-lg text-gray-900 font-medium focus:outline-none faq-question">
+        <span>Are there mobile apps for women’s safety in India?</span>
+        <span class="faq-icon text-2xl transition-transform">&#43;</span>
+      </button>
+      <div class="faq-answer px-6 pb-4 text-gray-700 text-base hidden">
+        Yes, apps like SheSafe, 112 India, Raksha, and My Safetipin offer features such as real-time location tracking, SOS alerts, and safety score maps.
+      </div>
+    </div>
+
+    <div class="bg-gray-50 rounded-lg">
+      <button type="button" class="w-full flex justify-between items-center px-6 py-4 text-left text-lg text-gray-900 font-medium focus:outline-none faq-question">
+        <span>What legal steps can a woman take if harassed?</span>
+        <span class="faq-icon text-2xl transition-transform">&#43;</span>
+      </button>
+      <div class="faq-answer px-6 pb-4 text-gray-700 text-base hidden">
+        File an FIR at the nearest police station, or contact the National Women’s Helpline (181). Many states also allow online complaint filing for anonymity.
+      </div>
+    </div>
+
+    <div class="bg-gray-50 rounded-lg">
+      <button type="button" class="w-full flex justify-between items-center px-6 py-4 text-left text-lg text-gray-900 font-medium focus:outline-none faq-question">
+        <span>What are the emergency numbers women should know?</span>
+        <span class="faq-icon text-2xl transition-transform">&#43;</span>
+      </button>
+      <div class="faq-answer px-6 pb-4 text-gray-700 text-base hidden">
+        In India: 112 (all emergencies), 100 (police), 1091 (women’s helpline), 181 (National Women’s Helpline).
+      </div>
+    </div>
+
+    <div class="bg-gray-50 rounded-lg">
+      <button type="button" class="w-full flex justify-between items-center px-6 py-4 text-left text-lg text-gray-900 font-medium focus:outline-none faq-question">
+        <span>Can I carry pepper spray legally in India?</span>
+        <span class="faq-icon text-2xl transition-transform">&#43;</span>
+      </button>
+      <div class="faq-answer px-6 pb-4 text-gray-700 text-base hidden">
+        Yes, pepper spray is legal in India for self-defense purposes. It is advisable to carry it discreetly and use only in emergencies.
+      </div>
+    </div>
+
+    <div class="bg-gray-50 rounded-lg">
+      <button type="button" class="w-full flex justify-between items-center px-6 py-4 text-left text-lg text-gray-900 font-medium focus:outline-none faq-question">
+        <span>How does the SOS feature in safety apps work?</span>
+        <span class="faq-icon text-2xl transition-transform">&#43;</span>
+      </button>
+      <div class="faq-answer px-6 pb-4 text-gray-700 text-base hidden">
+        SOS sends your location and a distress message to your emergency contacts or local police. In many apps, it can be activated by pressing a button or shaking the phone.
+      </div>
+    </div>
+
+    <div class="bg-gray-50 rounded-lg">
+      <button type="button" class="w-full flex justify-between items-center px-6 py-4 text-left text-lg text-gray-900 font-medium focus:outline-none faq-question">
+        <span>What are some safety tips for women using public transport?</span>
+        <span class="faq-icon text-2xl transition-transform">&#43;</span>
+      </button>
+      <div class="faq-answer px-6 pb-4 text-gray-700 text-base hidden">
+        Travel in well-lit, crowded areas; avoid dozing off; stay near the driver or conductor; and use transport tracking apps to share routes with family/friends.
+      </div>
+    </div>
+
+    <div class="bg-gray-50 rounded-lg">
+      <button type="button" class="w-full flex justify-between items-center px-6 py-4 text-left text-lg text-gray-900 font-medium focus:outline-none faq-question">
+        <span>What should I do if I'm being followed?</span>
+        <span class="faq-icon text-2xl transition-transform">&#43;</span>
+      </button>
+      <div class="faq-answer px-6 pb-4 text-gray-700 text-base hidden">
+        Don’t go home. Enter a public building or store, alert someone, and call 112. If safe, record evidence discreetly and report to authorities.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+  <footer class="bg-[#191919] text-gray-300 pt-12 pb-6 px-4">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:justify-between gap-10">
+      <div class="md:w-1/4 flex flex-col items-center md:items-start text-center md:text-left">
+        <div class="flex items-center gap-2 mb-4">
+          <img src="https://static.vecteezy.com/system/resources/previews/004/291/033/non_2x/women-protection-black-glyph-icon-protect-girls-against-violence-female-empowerment-women-safety-gender-equality-provide-security-silhouette-symbol-on-white-space-isolated-illustration-vector.jpg"
+               alt="SheSafe Logo"
+               class="h-10 w-10 rounded-full bg-white object-cover">
+          <span class="font-extrabold text-2xl text-white tracking-wide">SheSafe</span>
+        </div>
+        <p class="text-sm mb-4 text-gray-400">
+          The best place to find safe zones, report incidents, and access real-time safety information for women at night.
+        </p>
+        <div class="flex gap-3 justify-center md:justify-start mb-2">
+          <a href="#" class="hover:text-pink-400" aria-label="LinkedIn"><i class="fab fa-linkedin-in fa-lg"></i></a>
+          <a href="#" class="hover:text-pink-400" aria-label="X"><i class="fab fa-x-twitter fa-lg"></i></a>
+          <a href="#" class="hover:text-pink-400" aria-label="Instagram"><i class="fab fa-instagram fa-lg"></i></a>
+          <a href="#" class="hover:text-pink-400" aria-label="YouTube"><i class="fab fa-youtube fa-lg"></i></a>
+        </div>
+      </div>
+      <div class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div>
+          <h3 class="text-orange-400 font-semibold mb-3">Company</h3>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#" class="hover:underline">About Us</a></li>
+            <li><a href="#" class="hover:underline">Contact Us</a></li>
+            <li><a href="#" class="hover:underline">Pricing</a></li>
+            <li><a href="#" class="hover:underline">Privacy Policy</a></li>
+            <li><a href="#" class="hover:underline">Terms and Conditions</a></li>
+            <li><a href="#" class="hover:underline">Cancellation / Refund Policy</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-orange-400 font-semibold mb-3">Quick Access</h3>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#" class="hover:underline">Find Safe Route</a></li>
+            <li><a href="#" class="hover:underline">Real-time Alerts</a></li>
+            <li><a href="#" class="hover:underline">Area Reviews</a></li>
+            <li><a href="#" class="hover:underline">Safety Tips</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-orange-400 font-semibold mb-3">Safety Sheets</h3>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#" class="hover:underline">Volunteer Patrols</a></li>
+            <li><a href="#" class="hover:underline">Accessibility Options</a></li>
+            <li><a href="#" class="hover:underline">Awareness Campaigns</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-orange-400 font-semibold mb-3">Support</h3>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#" class="hover:underline">FAQs</a></li>
+            <li><a href="#" class="hover:underline">Help Center</a></li>
+            <li><a href="#" class="hover:underline">Feedback</a></li>
+            <li><a href="#" class="hover:underline">Report an Issue</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-gray-700 mt-10 pt-4 text-center text-xs text-gray-500">
+      Copyright &copy; 2025 SheSafe. All rights reserved.
+    </div>
+  </footer>
+
+ <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="main.js"></script>
+
+</body>
+</html>
