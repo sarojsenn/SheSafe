@@ -24,7 +24,7 @@ Because safety is a right, not a privilege. With SheSafe, youâ€™re never aloneâ€
 Quick Start: Coming Soon!
 
 # Clone the repository
-git clone https://github.com/sarojsenn/shesafe.git
+git clone https://github.com/sarojsenn/SheSafe.git
 
 # Move into the project directory
 cd shesafe
